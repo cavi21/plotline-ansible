@@ -1,0 +1,4 @@
+#!/bin/sh
+[ -d {{app_dir}}/shared/log/thumbor-{{ item }} ] || mkdir -p {{app_dir}}/shared/log/thumbor-{{ item }}
+
+exec svlogd -tt {{app_dir}}/current/log/thumbor-{{ item }}

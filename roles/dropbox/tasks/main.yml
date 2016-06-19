@@ -1,0 +1,27 @@
+---
+- name: Install Dropbox
+  become: yes
+  become_user: deploy
+  shell: curl -L "https://www.dropbox.com/download?plat=lnx.x86_64" | tar -C $HOME -xzf - creates=/home/deploy/.dropbox-dist/dropboxd
+
+- name: Create runit directory
+  file: dest=/home/deploy/sv/dropbox mode=775 state=directory owner=deploy group=deploy
+  ignore_errors: yes
+
+- name: Copy run script
+  template: src=runit/run.j2 dest=/home/deploy/sv/dropbox/run owner=deploy group=deploy mode=755
+  ignore_errors: yes
+
+- name: Create log directories
+  file: dest=/home/deploy/sv/dropbox/log mode=775 state=directory owner=deploy group=deploy
+  ignore_errors: yes
+
+- name: Copy log scripts
+  template: src=runit/log.j2 dest=/home/deploy/sv/dropbox/log/run owner=deploy group=deploy mode=755
+  ignore_errors: yes
+
+- name: Link run scripts
+  file: src=/home/deploy/sv/dropbox dest=/home/deploy/service/dropbox state=link owner=deploy group=deploy
+  ignore_errors: yes
+  notify:
+    - Restart runsvdir

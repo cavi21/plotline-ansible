@@ -1,0 +1,31 @@
+---
+- name: Install runit
+  apt: pkg=runit state=installed update_cache=true
+  notify:
+    - Start runsvdir
+
+- name: Ubuntu - start and enable runit service
+  service: name=runsvdir enabled=yes state=started
+
+- name: Deploy - create services directory
+  file: dest=/home/deploy/service mode=775 state=directory owner=deploy group=deploy
+  ignore_errors: yes
+
+- name: Deploy - create sv directory
+  file: dest=/home/deploy/sv mode=775 state=directory owner=deploy group=deploy
+  ignore_errors: yes
+
+- name: Deploy - create runit directory
+  file: dest=/etc/sv/runsvdir-deploy mode=775 state=directory owner=root group=root
+  ignore_errors: yes
+
+- name: Deploy - copy run script
+  template: src=runit/run.j2 dest=/etc/sv/runsvdir-deploy/run owner=root group=root mode=755
+
+- name: Deploy - copy finish script
+  template: src=runit/finish.j2 dest=/etc/sv/runsvdir-deploy/finish owner=root group=root mode=755
+
+- name: Deploy - link run scripts
+  file: src=/etc/sv/runsvdir-deploy dest=/etc/service/runsvdir-deploy state=link
+  notify:
+    - Restart runsvdir

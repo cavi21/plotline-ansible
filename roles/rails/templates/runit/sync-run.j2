@@ -1,0 +1,9 @@
+#!/bin/sh
+exec 2>&1
+
+export RBENV_ROOT=/home/deploy/.rbenv
+export PATH=/home/deploy/.rbenv/shims:$PATH
+export RAILS_ENV={{rails_env}}
+
+cd {{app_dir}}/current
+exec bundle exec plotline sync --source {{content_dir}}

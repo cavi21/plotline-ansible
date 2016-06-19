@@ -1,0 +1,6 @@
+.DS_Store
+._*
+group_vars/all/vault
+group_vars/all/custom
+.vagrant
+playbook.retry

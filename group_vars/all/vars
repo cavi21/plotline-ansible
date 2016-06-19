@@ -1,0 +1,30 @@
+---
+# System Users
+# -----------------------------------------------------------------------------
+# vault_common_public_key: VAULT
+# vault_admin_password: VAULT
+# vault_vault_deploy_password: VAULT
+
+# Ruby & Rails
+# -----------------------------------------------------------------------------
+ruby_version: "2.3.1"
+ruby_deploy_user: "deploy"
+rails_env: production
+
+# AWS
+# -----------------------------------------------------------------------------
+aws_format: json
+
+# Logrotate
+# -----------------------------------------------------------------------------
+logrotate_scripts:
+  - name: nginx
+    path: /var/log/nginx/*.log
+    options:
+      - weekly
+      - size 25M
+      - rotate 7
+      - missingok
+      - compress
+      - delaycompress
+      - copytruncate

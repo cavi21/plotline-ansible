@@ -1,0 +1,5 @@
+---
+app_dir: "/var/www/{{app_name}}"
+app_shared_dir: "{{app_dir}}/shared"
+app_shared_config_dir: "{{app_dir}}/shared/config"
+app_uploads_dir: "{{app_dir}}/shared/public/uploads"

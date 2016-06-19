@@ -1,0 +1,4 @@
+#!/bin/sh
+[ -d {{app_dir}}/shared/log/puma ] || mkdir -p {{app_dir}}/shared/log/puma
+
+exec svlogd -tt {{app_dir}}/current/log/puma

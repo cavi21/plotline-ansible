@@ -1,0 +1,57 @@
+---
+- name: Add Nginx Repository
+  apt_repository: repo='ppa:mc3man/trusty-media' state=present
+
+- name: Install Thumbor Dependencies
+  apt: pkg={{ item }} state=installed update_cache=true
+  with_items:
+    - ffmpeg
+    - libjpeg-dev
+    - libpng-dev
+    - libtiff-dev
+    - libjasper-dev
+    - libgtk2.0-dev
+    - python-numpy
+    - python-pycurl
+    - webp
+    - python-opencv
+    - python-dev
+    - python-pip
+
+- name: Install Thumbor Dependencies
+  pip: name=thumbor
+
+- name: Add Thumbor Nginx Config
+  template: src=thumbor.j2 dest=/etc/nginx/sites-available/thumbor.conf owner=root group=root
+  tags:
+    - vhost
+
+- name: Enable Thumbor Nginx Config
+  file: src=/etc/nginx/sites-available/thumbor.conf dest=/etc/nginx/sites-enabled/thumbor.conf state=link
+  tags:
+    - vhost
+  notify:
+    - Reload Nginx
+
+- name: Thumbor - create runit directory
+  file: dest=/home/deploy/sv/thumbor-{{ item }} mode=775 state=directory owner=deploy group=deploy
+  ignore_errors: yes
+  with_items: "{{ thumbor_instances }}"
+
+- name: Thumbor - copy run scripts
+  template: src=runit/run.j2 dest=/home/deploy/sv/thumbor-{{ item }}/run owner=deploy group=deploy mode=755
+  with_items: "{{ thumbor_instances }}"
+
+- name: Thumbor - create log directory
+  file: dest=/home/deploy/sv/thumbor-{{ item }}/log mode=775 state=directory owner=deploy group=deploy
+  ignore_errors: yes
+  with_items: "{{ thumbor_instances }}"
+
+- name: Copy log scripts
+  template: src=runit/log.j2 dest=/home/deploy/sv/thumbor-{{ item }}/log/run owner=deploy group=deploy mode=755
+  ignore_errors: yes
+  with_items: "{{ thumbor_instances }}"
+
+- name: Thumbor - link run scripts
+  file: src=/home/deploy/sv/thumbor-{{ item }} dest=/home/deploy/service/thumbor-{{ item }} state=link
+  with_items: "{{ thumbor_instances }}"

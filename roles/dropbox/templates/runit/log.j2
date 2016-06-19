@@ -1,0 +1,4 @@
+#!/bin/sh
+[ -d /home/deploy/dropbox-log ] || mkdir -p /home/deploy/dropbox-log
+
+exec svlogd -tt /home/deploy/dropbox-log

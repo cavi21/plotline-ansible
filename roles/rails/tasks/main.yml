@@ -1,0 +1,77 @@
+---
+- name: Install Required Dependencies
+  apt: pkg={{ item }} state=installed update_cache=yes
+  with_items:
+   - nodejs
+   - exiftool
+   - inotify-tools
+
+- name: Add App Nginx Config
+  template: src={{ app_name }}.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf owner=root group=root
+  tags:
+    - vhost
+  notify:
+    - Reload Nginx
+
+- name: Enable App Site Config
+  file: src=/etc/nginx/sites-available/{{ app_name }}.conf dest=/etc/nginx/sites-enabled/{{ app_name }}.conf state=link
+  tags:
+    - vhost
+  notify:
+    - Reload Nginx
+
+- name: Create app directories
+  file: >
+    dest="{{item}}"
+    state=directory
+    owner=deploy
+    group=deploy
+    mode=755
+  with_items:
+    - "{{app_dir}}"
+    - "{{app_shared_dir}}"
+    - "{{app_shared_config_dir}}"
+    - "{{app_uploads_dir}}"
+
+- name: Copy database config
+  template: src=database.yml.j2 dest={{app_shared_config_dir}}/database.yml owner=deploy group=deploy
+
+- name: Copy rbenv-vars
+  template: src=rbenv-vars.j2 dest={{app_shared_dir}}/.rbenv-vars owner=deploy group=deploy
+
+- name: Create runit directories
+  file: dest=/home/deploy/sv/{{item}} mode=775 state=directory owner=deploy group=deploy
+  ignore_errors: yes
+  with_items:
+    - puma
+    - sync
+
+- name: Copy run scripts
+  template: src=runit/{{item}}-run.j2 dest=/home/deploy/sv/{{item}}/run owner=deploy group=deploy mode=755
+  ignore_errors: yes
+  with_items:
+    - puma
+    - sync
+
+- name: Create log directories
+  file: dest=/home/deploy/sv/{{item}}/log mode=775 state=directory owner=deploy group=deploy
+  ignore_errors: yes
+  with_items:
+    - puma
+    - sync
+
+- name: Copy log scripts
+  template: src=runit/{{item}}-log.j2 dest=/home/deploy/sv/{{item}}/log/run owner=deploy group=deploy mode=755
+  ignore_errors: yes
+  with_items:
+    - puma
+    - sync
+
+- name: Link run scripts
+  file: src=/home/deploy/sv/{{item}} dest=/home/deploy/service/{{item}} state=link owner=deploy group=deploy
+  ignore_errors: yes
+  with_items:
+    - puma
+    - sync
+  notify:
+    - Restart runsvdir

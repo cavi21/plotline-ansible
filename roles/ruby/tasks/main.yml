@@ -1,0 +1,37 @@
+- name: Installs ruby building dependencies
+  apt: name={{ item }} state=installed update-cache=yes
+  with_items: "{{ ruby_deps }}"
+
+- name: Checks if target ruby is installed
+  sudo_user: "{{ ruby_deploy_user }}"
+  sudo: yes
+  shell: cd; bash -lc "rbenv versions | grep {{ ruby_version }} | tr '*' ' ' | sed -e 's/\s\+//' | cut -f1 -d' '"
+  register: ruby_is_installed
+  changed_when: ruby_is_installed.stdout != ruby_version
+
+- name: Sets fake ruby version for check mode
+  set_fact:
+    ruby_is_installed: { 'stdout': "{{ruby_version}}" }
+  when: ruby_is_installed|skipped
+
+- name: Installs ruby
+  sudo_user: "{{ ruby_deploy_user }}"
+  sudo: yes
+  shell: cd; bash -lc "MAKEOPTS={{ ruby_makeopts }} CONFIGURE_OPTS="--disable-install-rdoc" rbenv install {{ ruby_version }}"
+  when: ruby_is_installed.stdout != ruby_version
+  # Takes no more than 600 secs on a small VM
+  async: 900
+  poll: 30
+
+- name: Installs bundler for new ruby
+  sudo_user: "{{ ruby_deploy_user }}"
+  sudo: yes
+  shell: cd; bash -lc "rbenv local {{ ruby_version }} && gem install bundler"
+  when: ruby_is_installed.stdout != ruby_version
+  register: new_ruby_installed
+
+- name: Set global rbenv version
+  sudo_user: "{{ ruby_deploy_user }}"
+  sudo: yes
+  shell: cd; bash -lc "rbenv global {{ ruby_version }}"
+  when: new_ruby_installed|changed

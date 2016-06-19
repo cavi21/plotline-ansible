@@ -1,0 +1,20 @@
+---
+- hosts: all
+  sudo: yes
+  roles:
+   # - base
+   # - firewall
+   # - fail2ban
+   # - ssh
+   # - swap
+   # - user
+   # - runit
+   # - nginx
+   # - postgresql
+   # - rbenv
+   # - ruby
+   # - s3-backup
+   # - dropbox
+   - rails
+   # - thumbor
+   # - nickhammond.logrotate

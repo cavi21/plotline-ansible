@@ -1,0 +1,11 @@
+defaults: &defaults
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  pool: 5
+  database: {{ postgres_database }}
+  username: {{ postgres_username }}
+  password: {{ vault_postgres_password }}
+
+production:
+  <<: *defaults

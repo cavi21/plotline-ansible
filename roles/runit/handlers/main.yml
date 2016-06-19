@@ -1,0 +1,6 @@
+---
+- name: Start runsvdir
+  service: name=runsvdir state=started
+
+- name: Restart runsvdir
+  service: name=runsvdir state=restarted

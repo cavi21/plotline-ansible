@@ -1,0 +1,26 @@
+upstream thumbor {
+  {% for port in thumbor_instances %}
+      server 127.0.0.1:{{ port }};
+  {% endfor %}
+}
+
+server {
+    listen 80;
+    server_name {{ thumbor_host }};
+
+    client_max_body_size 4G;
+
+    default_type application/octet-stream;
+
+    merge_slashes off;
+
+    location / {
+        proxy_pass http://thumbor; # match the name of upstream directive which is defined above
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location = /favicon.ico {
+        return 204;
+    }
+}

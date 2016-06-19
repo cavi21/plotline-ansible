@@ -1,0 +1,20 @@
+---
+# Site-specific variables
+
+# app_name: blog
+# app_domain: example.com
+#
+# content_dir: /home/deploy/Dropbox/my-awesome-blog
+
+# thumbor_host: images.example.com
+# thumbor_instances:
+#   - 8000
+#   - 8001
+#   - 8002
+#   - 8003
+
+# aws_region: us-east-1
+# aws_bucket_name: blog-backup
+
+# postgres_database: blog_production
+# postgres_username: blog
